@@ -45,19 +45,17 @@ class HexagonalArchitectureTest {
                     .resideInAPackage("$APPLICATION_PACKAGE..")
                     .should()
                     .accessClassesThat()
-                    .resideInAnyPackage("$ADAPTER_PACKAGE..")
+                    .resideInAPackage("$ADAPTER_PACKAGE..")
 
     @ParameterizedTest(name = "adapter \"{1}\" does not access another adapter")
     @MethodSource("adapterParametersProvider")
-    fun `one adapter should not access another adapter`(classes: JavaClasses, adapter: String) {
-        val givenAdapterPackage = "$ADAPTER_PACKAGE.$adapter.."
+    fun `one adapter should not access another adapter`(classes: JavaClasses, adapterPackage: String) {
         val otherAdapterPackages = ADAPTER_SUBPACKAGES
-                .map { "$ADAPTER_PACKAGE.$it.." }
-                .filter { it != givenAdapterPackage }
+                .filter { it != adapterPackage }
                 .toTypedArray()
         noClasses()
                 .that()
-                .resideInAPackage(givenAdapterPackage)
+                .resideInAPackage(adapterPackage)
                 .should()
                 .accessClassesThat()
                 .resideInAnyPackage(*otherAdapterPackages)
@@ -66,17 +64,24 @@ class HexagonalArchitectureTest {
 
     companion object {
         private val BASE_PACKAGE = HexagonalArchitectureTest::class.java.`package`.name
+        private val CLASSES = ClassFileImporter().importPackages("$BASE_PACKAGE..")
+
         private val DOMAIN_PACKAGE = "$BASE_PACKAGE.domain"
         private val DOMAIN_MODEL_PACKAGE = "$DOMAIN_PACKAGE.model"
         private val DOMAIN_SERVICE_PACKAGE = "$DOMAIN_PACKAGE.service"
+
         private val APPLICATION_PACKAGE = "$BASE_PACKAGE.application"
+
         private val ADAPTER_PACKAGE = "$BASE_PACKAGE.adapter"
-        private val ADAPTER_SUBPACKAGES = listOf("cli", "persistence", "rest")
+        private val ADAPTER_SUBPACKAGE_REGEX = "($ADAPTER_PACKAGE\\.[^.]+).*".toRegex()
+        private val ADAPTER_SUBPACKAGES = CLASSES
+                .map { ADAPTER_SUBPACKAGE_REGEX.find(it.name)?.groups?.get(1)?.value }
+                .filter { it != null }
+                .toSet()
 
         @JvmStatic
         private fun adapterParametersProvider(): List<Arguments> {
-            val classes = ClassFileImporter().importPackages("$BASE_PACKAGE..")
-            return ADAPTER_SUBPACKAGES.map { Arguments.of(classes, it) }
+            return ADAPTER_SUBPACKAGES.map { Arguments.of(CLASSES, it) }
         }
     }
 }
