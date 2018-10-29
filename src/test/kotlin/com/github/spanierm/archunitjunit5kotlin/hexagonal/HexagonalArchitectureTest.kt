@@ -76,8 +76,8 @@ class HexagonalArchitectureTest {
         private val ADAPTER_SUBPACKAGE_REGEX = "($ADAPTER_PACKAGE\\.[^.]+).*".toRegex()
         private val ADAPTER_SUBPACKAGES = CLASSES
                 .map { ADAPTER_SUBPACKAGE_REGEX.find(it.name)?.groups?.get(1)?.value }
-                .filter { it != null }
-                .toSet()
+                .filterNotNull()
+                .distinct()
 
         @JvmStatic
         private fun adapterParametersProvider(): List<Arguments> {
