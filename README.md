@@ -31,9 +31,24 @@ It assumes a certain structure of all classes in the root package, i.e. the pack
   Classes in any `adapter` package can access all classes in the `domain` and `application` package
     but must not have dependencies on any other adapter packages.
 
+<p align="center">
+    <img src="./docs/onion-architecture.svg">
+</p>
+
 Note that the example code in the [onion](./src/main/kotlin/com/github/spanierm/archunitjunit5kotlin/onion) package contain code that breaks the build.
 Uncomment the corresponding parts to make the tests pass.
 
+
+# Usage and Contribution
+
+Let us know if you like [ArchUnit] and use the templates in this repository by leaving a tweet mentioning [@archtests] and [@spanier_m].
+
+If you want to change parts of these examples, simply open a pull request with the changes and/or open an issue.
+
+
+
+[@archtests]: https://twitter.com/archtests
+[@spanier_m]: https://twitter.com/spanier_m
 [ArchUnit]: https://www.archunit.org/
 [Junit5]: https://junit.org/junit5/
 [Kotlin]: https://kotlinlang.org/
