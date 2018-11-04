@@ -1,4 +1,4 @@
-package com.github.spanierm.archunitjunit5kotlin.hexagonal
+package com.github.spanierm.archunitjunit5kotlin.onion
 
 import com.tngtech.archunit.core.domain.JavaClasses
 import com.tngtech.archunit.core.importer.ClassFileImporter
@@ -11,8 +11,8 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 
 
-@AnalyzeClasses(packagesOf = [HexagonalArchitectureTest::class])
-class HexagonalArchitectureTest {
+@AnalyzeClasses(packagesOf = [OnionArchitectureTest::class])
+class OnionArchitectureTest {
     @ArchTest
     val `there are no package cycles` =
             SlicesRuleDefinition.slices()
@@ -63,7 +63,7 @@ class HexagonalArchitectureTest {
     }
 
     companion object {
-        private val BASE_PACKAGE = HexagonalArchitectureTest::class.java.`package`.name
+        private val BASE_PACKAGE = OnionArchitectureTest::class.java.`package`.name
         private val CLASSES = ClassFileImporter().importPackages("$BASE_PACKAGE..")
 
         private val DOMAIN_PACKAGE = "$BASE_PACKAGE.domain"
