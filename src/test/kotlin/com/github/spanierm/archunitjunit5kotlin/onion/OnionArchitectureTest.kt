@@ -6,22 +6,24 @@ import com.tngtech.archunit.junit.AnalyzeClasses
 import com.tngtech.archunit.junit.ArchTest
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses
 import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AnalyzeClasses(packagesOf = [OnionArchitectureTest::class])
-class OnionArchitectureTest {
+internal class OnionArchitectureTest {
     @ArchTest
-    val `there are no package cycles` =
+    internal val `there are no package cycles` =
             SlicesRuleDefinition.slices()
                     .matching("$BASE_PACKAGE.(**)..")
                     .should()
                     .beFreeOfCycles()
 
     @ArchTest
-    val `the domain model does not have outgoing dependencies` =
+    internal val `the domain model does not have outgoing dependencies` =
             noClasses()
                     .that()
                     .resideInAPackage("$DOMAIN_MODEL_PACKAGE..")
@@ -30,7 +32,7 @@ class OnionArchitectureTest {
                     .resideInAnyPackage("$DOMAIN_SERVICE_PACKAGE..", "$APPLICATION_PACKAGE..", "$ADAPTER_PACKAGE..")
 
     @ArchTest
-    val `the domain does not access the application and adapters` =
+    internal val `the domain does not access the application and adapters` =
             noClasses()
                     .that()
                     .resideInAPackage("$DOMAIN_PACKAGE..")
@@ -39,7 +41,7 @@ class OnionArchitectureTest {
                     .resideInAnyPackage("$APPLICATION_PACKAGE..", "$ADAPTER_PACKAGE..")
 
     @ArchTest
-    val `the application does not access the adapters` =
+    internal val `the application does not access the adapters` =
             noClasses()
                     .that()
                     .resideInAPackage("$APPLICATION_PACKAGE..")
@@ -49,7 +51,7 @@ class OnionArchitectureTest {
 
     @ParameterizedTest(name = "adapter \"{1}\" does not access another adapter")
     @MethodSource("adapterParametersProvider")
-    fun `one adapter should not access another adapter`(classes: JavaClasses, adapterPackage: String) {
+    internal fun `one adapter should not access another adapter`(classes: JavaClasses, adapterPackage: String) {
         val otherAdapterPackages = ADAPTER_SUBPACKAGES
                 .filter { it != adapterPackage }
                 .toTypedArray()
@@ -61,6 +63,11 @@ class OnionArchitectureTest {
                 .resideInAnyPackage(*otherAdapterPackages)
                 .check(classes)
     }
+
+    private fun adapterParametersProvider(): List<Arguments> {
+        return ADAPTER_SUBPACKAGES.map { Arguments.of(CLASSES, it) }
+    }
+
 
     companion object {
         private val BASE_PACKAGE = OnionArchitectureTest::class.java.`package`.name
@@ -78,10 +85,5 @@ class OnionArchitectureTest {
                 .map { ADAPTER_SUBPACKAGE_REGEX.find(it.name)?.groups?.get(1)?.value }
                 .filterNotNull()
                 .distinct()
-
-        @JvmStatic
-        private fun adapterParametersProvider(): List<Arguments> {
-            return ADAPTER_SUBPACKAGES.map { Arguments.of(CLASSES, it) }
-        }
     }
 }
