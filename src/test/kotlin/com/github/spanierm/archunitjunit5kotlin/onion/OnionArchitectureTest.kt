@@ -47,7 +47,7 @@ internal class OnionArchitectureTest {
     @ArchTest
     val `one adapter should not access another adapter` =
         slices()
-                .matching("$ADAPTER_PACKAGE.(**)")
+                .matching("$ADAPTER_PACKAGE.(*)")
                 .should().notDependOnEachOther()
 
     companion object {
