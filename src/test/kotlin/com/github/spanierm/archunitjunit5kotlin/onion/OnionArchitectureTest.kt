@@ -1,15 +1,11 @@
 package com.github.spanierm.archunitjunit5kotlin.onion
 
-import com.tngtech.archunit.core.domain.JavaClasses
-import com.tngtech.archunit.core.importer.ClassFileImporter
 import com.tngtech.archunit.junit.AnalyzeClasses
 import com.tngtech.archunit.junit.ArchTest
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses
 import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition
+import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.MethodSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AnalyzeClasses(packagesOf = [OnionArchitectureTest::class])
@@ -48,28 +44,14 @@ internal class OnionArchitectureTest {
                     .accessClassesThat()
                     .resideInAPackage("$ADAPTER_PACKAGE..")
 
-    @ParameterizedTest(name = "adapter \"{1}\" does not access another adapter")
-    @MethodSource("adapterParametersProvider")
-    fun `one adapter should not access another adapter`(classes: JavaClasses, adapterPackage: String) {
-        val otherAdapterPackages = ADAPTER_SUBPACKAGES
-                .filter { it != adapterPackage }
-                .toTypedArray()
-        noClasses()
-                .that()
-                .resideInAPackage(adapterPackage)
-                .should()
-                .accessClassesThat()
-                .resideInAnyPackage(*otherAdapterPackages)
-                .check(classes)
-    }
-
-    private fun adapterParametersProvider(): List<Arguments> {
-        return ADAPTER_SUBPACKAGES.map { Arguments.of(CLASSES, it) }
-    }
+    @ArchTest
+    val `one adapter should not access another adapter` =
+        slices()
+                .matching("$ADAPTER_PACKAGE.(**)")
+                .should().notDependOnEachOther()
 
     companion object {
         private val BASE_PACKAGE = OnionArchitectureTest::class.java.`package`.name
-        private val CLASSES = ClassFileImporter().importPackages("$BASE_PACKAGE..")
 
         private val DOMAIN_PACKAGE = "$BASE_PACKAGE.domain"
         private val DOMAIN_MODEL_PACKAGE = "$DOMAIN_PACKAGE.model"
@@ -78,10 +60,5 @@ internal class OnionArchitectureTest {
         private val APPLICATION_PACKAGE = "$BASE_PACKAGE.application"
 
         private val ADAPTER_PACKAGE = "$BASE_PACKAGE.adapter"
-        private val ADAPTER_SUBPACKAGE_REGEX = "($ADAPTER_PACKAGE\\.[^.]+).*".toRegex()
-        private val ADAPTER_SUBPACKAGES = CLASSES
-                .map { ADAPTER_SUBPACKAGE_REGEX.find(it.name)?.groups?.get(1)?.value }
-                .filterNotNull()
-                .distinct()
     }
 }
