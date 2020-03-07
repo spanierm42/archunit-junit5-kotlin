@@ -12,7 +12,7 @@ Other names for similar architectural approaches are
   [ports and adapters](http://wiki.c2.com/?PortsAndAdaptersArchitecture), and
   [clean architecture](http://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html).
 
-We built [ArchUnit] tests for this architectural style in the [OnionArchitectureTest.kt](./src/test/kotlin/com/github/spanierm/archunitjunit5kotlin/ArchUnitJunit5KotlinApplicationTests.kt) file.
+We built [ArchUnit] tests for this architectural style in the [OnionArchitectureTest.kt](./src/test/kotlin/com/github/spanierm/archunitjunit5kotlin/onion/OnionArchitectureTest.kt) file.
 It assumes a certain structure of all classes in the root package, i.e. the package of the `OnionArchitectureTest` class:
 * The core domain should be placed in the `domain` package.
   It contains the code logic of the application and is is independent of the infrastructure, adapters, frameworks in use, etc.
